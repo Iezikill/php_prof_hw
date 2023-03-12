@@ -1,8 +1,10 @@
 <?php
 
-namespace Geekbrains\Blog;
+namespace Viktoriya\PHP2\Blog; //слева виртуальное пространство, справа реальный путь
+//Viktoriya - имя создателя
+//PHP2 - имя проекта
 
-use Person\Name;
+use Viktoriya\PHP2\Person\Name;
 
 class User
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Person;
+namespace Viktoriya\PHP2\Person;
 
 class Person
 {
