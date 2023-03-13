@@ -1,0 +1,17 @@
+{
+  "name": "viktoriya/php2",
+  "autoload": {
+    "psr-4": {
+      "Viktoriya\\PHP2\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Viktoriya Goncharova",
+      "email": "viktoriya.shiryaeva54@yandex.ru"
+    }
+  ],
+  "require": {
+    "fakerphp/faker": "^1.21"
+  }
+}

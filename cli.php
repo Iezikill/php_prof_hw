@@ -1,41 +1,61 @@
 <?php
 
-//Добрый вечер, Александр.
-//Сдаю вам невыполненную работу, т.к. крайний срок сдачи дз подходит к концу
-//Я постараюсь успеть доделать дз до вашей проверки
-//Если не успела, поставьте пжл "не сдано", чтоб время продлилось и я успела доделать
-//Очень надеюсь на Ваше понимание =) на работе колапс...
+use Viktoriya\PHP2\Blog\Repositories\{Post, Comment, User};
+use Viktoriya\PHP2\Person\{Name, Person};
 
-//точка входа для запуска через консоль
-
-//псевдоним имени класса
-use Viktoriya\PHP2\Blog\User; //use добавит приставку src\Blog\ всем классам User
-use Viktoriya\PHP2\Blog\Post; //use добавит приставку src\Blog\ всем классам User
-use Viktoriya\PHP2\Person\Name;
-use Viktoriya\PHP2\Person\Person;
-
-//composer - аналог npm в JS (исп-ся для скачивания библиотек и для реализации автозагрузки классов)
-
-//функция для автоподключения классов
-spl_autoload_register('load'); //регистрируем функцию load; spl_autoload_register автоматически подключает, когда нужно найти какой-то класс
-function load($className)
+function load($classname)
 {
-  $file = $className . ".php";
+  $file = $classname . ".php";
   $file = str_replace(["\\", "Viktoriya/PHP2"], ["/", "src"], $file);
   if (file_exists($file)) {
     include $file;
   }
 }
 
-$name = new Name('Viktoriya', 'Goncharova');
-$user = new User(1, $name, "Admin");
-echo $user;
+include __DIR__ . "/vendor/autoload.php";
 
-$person = new Person($name, new DateTimeImmutable());
+$faker = Faker\Factory::create('ru_RU');
 
-$post = new Post(
-  1,
-  $person,
-  'Всем привет!'
+$name = new Name(
+  $faker->firstName(),
+  $faker->lastName()
 );
-echo $post;
+$user = new User(
+  $faker->randomDigitNotNull(),
+  $name,
+  $faker->word(1)
+);
+
+$route = $argv[1] ?? null;
+
+switch ($argv[1]) {
+  case "user":
+    echo $user;
+    break;
+  case "post":
+    $post = new Post(
+      $faker->randomDigitNotNull(),
+      $user,
+      $faker->realText(rand(10, 15)),
+      $faker->realText(rand(50, 100))
+    );
+    echo $post;
+    break;
+  case "comment":
+    $post = new Post(
+      $faker->randomDigitNotNull(),
+      $user,
+      $faker->realText(rand(10, 15)),
+      $faker->realText(rand(50, 100))
+    );
+    $comment = new Comment(
+      $faker->randomDigitNotNull(),
+      $user,
+      $post,
+      $faker->realText(rand(50, 100))
+    );
+    echo $comment;
+    break;
+  default:
+    echo 'Error! Try user, post or comment as arguments for success';
+}
