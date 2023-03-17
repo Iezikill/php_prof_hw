@@ -1,43 +1,33 @@
 <?php
 
-namespace Viktoriya\PHP2\Blog\Repositories;
+namespace Viktoriya\PHP2\Blog;
+
 
 class Comment
 {
-  private int $id;
-  private User $user;
-  private Post $post;
-  private string $commentText;
 
-  /**
-   * @param int $id
-   * @param User $user
-   * @param Post $post
-   * @param string $commentText
-   */
-  public function __construct(int $id, User $user, Post $post, string $commentText)
-  {
-    $this->id = $id;
-    $this->user = $user;
-    $this->post = $post;
-    $this->commentText = $commentText;
-  }
-
-
-  /**
-   * @return int
-   */
-  public function getId(): int
-  {
-    return $this->id;
+  public function __construct(
+    private UUID $uuid,
+    private Post $post,
+    private User $user,
+    private string $commentText
+  ) {
   }
 
   /**
-   * @param int $id
+   * @return UUID
    */
-  public function setId(int $id): void
+  public function getUuid(): UUID
   {
-    $this->id = $id;
+    return $this->uuid;
+  }
+
+  /**
+   * @param UUID $uuid
+   */
+  public function setUuid(UUID $uuid): void
+  {
+    $this->uuid = $uuid;
   }
 
   /**
@@ -88,9 +78,8 @@ class Comment
     $this->commentText = $commentText;
   }
 
-
   public function __toString()
   {
-    return $this->user . ' опубликовал комментарий: "' . $this->commentText . PHP_EOL;
+    return $this->user . ' опубликовал комментарий: "' . $this->commentText . '"' . PHP_EOL;
   }
 }
