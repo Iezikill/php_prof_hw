@@ -5,6 +5,11 @@
       "Viktoriya\\PHP2\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Viktoriya\\Blog\\UnitTests": "tests/"
+    }
+  },
   "authors": [
     {
       "name": "Viktoriya Goncharova",
@@ -12,13 +17,15 @@
     }
   ],
   "require": {
+    "php": "^8.2.3",
+    "fakerphp/faker": "*",
     "ext-pdo": "*",
     "symfony/polyfill-uuid": "^1.27"
   },
   "require-dev": {
-    "phpunit/phpunit": "*",
-    "fakerphp/faker": "^1.21",
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "phpunit/phpunit": "^10.0",
+    "squizlabs/php_codesniffer": "3.*"
   },
   "scripts": {
     "test": "phpunit tests --testdox --colors"
