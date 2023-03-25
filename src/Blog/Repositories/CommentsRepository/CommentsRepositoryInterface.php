@@ -7,6 +7,7 @@ use Viktoriya\PHP2\Blog\UUID;
 
 interface CommentsRepositoryInterface
 {
-  public function save(Comment $user): void;
+  public function save(Comment $comment): void;
   public function get(UUID $uuid): Comment;
+  public function delete(UUID $uuid): void;
 }

@@ -21,49 +21,37 @@ class SqliteUsersRepository implements UsersRepositoryInterface
 
   public function save(User $user): void
   {
+
     $statement = $this->connection->prepare(
-      'INSERT INTO users (
-                   first_name, 
-                   last_name, 
-                   uuid, 
-                   username) 
-            VALUES (
-                    :first_name, 
-                    :last_name, 
-                    :uuid, 
-                    :username
-                    )
-                    ON CONFLICT(uuid) DO UPDATE SET
-                    first_name=:first_name,
-                    last_name=:last_name
-                    '
+      'INSERT INTO users (first_name, last_name, uuid, username) 
+            VALUES (:first_name, :last_name, :uuid, :username)'
+
     );
     $statement->execute([
       ':first_name' => $user->name()->first(),
       ':last_name' => $user->name()->last(),
       ':uuid' => (string)$user->uuid(),
-      ':username' => $user->username()
+      ':username' => $user->username(),
     ]);
   }
 
   /**
-   * @throws InvalidArgumentException
    * @throws UserNotFoundException
+   * @throws InvalidArgumentException
    */
   public function get(UUID $uuid): User
   {
     $statement = $this->connection->prepare(
-      'SELECT * FROM users WHERE uuid = :uuid'
+      'SELECT * FROM users WHERE uuid = ?'
     );
-    $statement->execute([
-      ':uuid' => (string)$uuid,
-    ]);
+
+    $statement->execute([(string)$uuid]);
     return $this->getUser($statement, $uuid);
   }
 
   /**
-   * @throws InvalidArgumentException
    * @throws UserNotFoundException
+   * @throws InvalidArgumentException
    */
   public function getByUsername(string $username): User
   {
@@ -73,19 +61,20 @@ class SqliteUsersRepository implements UsersRepositoryInterface
     $statement->execute([
       ':username' => $username,
     ]);
+
     return $this->getUser($statement, $username);
   }
 
   /**
-   * @throws InvalidArgumentException
    * @throws UserNotFoundException
+   * @throws InvalidArgumentException
    */
-  private function getUser(PDOStatement $statement, string $username): User
+  private function getUser(PDOStatement $statement, string $errorString): User
   {
-    $result = $statement->fetch(PDO::FETCH_ASSOC);
-    if (false === $result) {
+    $result = $statement->fetch(\PDO::FETCH_ASSOC);
+    if ($result === false) {
       throw new UserNotFoundException(
-        "Cannot find user: $username"
+        "Cannot find user: $errorString"
       );
     }
     return new User(

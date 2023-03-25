@@ -19,11 +19,9 @@ class SqliteUsersRepositoryTest extends TestCase
     $statementStub = $this->createStub(PDOStatement::class);
     $statementStub->method('fetch')->willReturn(false);
     $connectionMock->method('prepare')->willReturn($statementStub);
-
     $repository = new SqliteUsersRepository($connectionMock);
     $this->expectException(UserNotFoundException::class);
     $this->expectExceptionMessage('Cannot find user: Stan');
-
     $repository->getByUsername('Stan');
   }
 
@@ -36,19 +34,17 @@ class SqliteUsersRepositoryTest extends TestCase
       ->method('execute')
       ->with([
         ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
-        ':username' => 'ivan123',
+        ':username' => 'ivan1',
         ':first_name' => 'Ivan',
-        ':last_name' => 'Nikitin',
+        ':last_name' => 'Ivanov',
       ]);
     $connectionStub->method('prepare')->willReturn($statementMock);
-
     $repository = new SqliteUsersRepository($connectionStub);
-
     $repository->save(
       new User(
         new UUID('123e4567-e89b-12d3-a456-426614174000'),
-        new Name('Ivan', 'Nikitin'),
-        'ivan123',
+        new Name('Ivan', 'Ivanov'),
+        'ivan1',
       )
     );
   }
