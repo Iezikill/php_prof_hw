@@ -4,8 +4,10 @@ namespace Viktoriya\PHP2\Blog\Repositories\UsersRepository;;
 
 use Viktoriya\PHP2\Blog\Exceptions\UserNotFoundException;
 use Viktoriya\PHP2\Blog\User;
+use Viktoriya\PHP2\Blog\Repositories\UsersRepository\UsersRepositoryInterface;
+use Viktoriya\PHP2\Blog\UUID;
 
-class InMemoryUsersRepository
+class InMemoryUsersRepository implements UsersRepositoryInterface
 {
   private array $users = [];
 
@@ -19,7 +21,7 @@ class InMemoryUsersRepository
    * @return User
    * @throws UserNotFoundException
    */
-  public function get(int $id): User
+  public function get(UUID $id): User
   {
     foreach ($this->users as $user) {
       if ($user->id() === $id) {
@@ -27,5 +29,8 @@ class InMemoryUsersRepository
       }
     }
     throw new UserNotFoundException("User not found: $id");
+  }
+  public function getByUsername(string $username): User
+  {
   }
 }

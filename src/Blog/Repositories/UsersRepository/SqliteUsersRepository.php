@@ -8,7 +8,7 @@ use Viktoriya\PHP2\Blog\User;
 use Viktoriya\PHP2\Blog\UUID;
 use Viktoriya\PHP2\Person\Name;
 use \PDO;
-use PDOStatement;
+use \PDOStatement;
 
 class SqliteUsersRepository implements UsersRepositoryInterface
 {
@@ -23,15 +23,18 @@ class SqliteUsersRepository implements UsersRepositoryInterface
   {
 
     $statement = $this->connection->prepare(
-      'INSERT INTO users (first_name, last_name, uuid, username) 
-            VALUES (:first_name, :last_name, :uuid, :username)'
-
+      'INSERT INTO users (uuid, username, first_name, last_name) 
+            VALUES (:uuid, :username, :first_name, :last_name)
+            ON CONFLICT (uuid) DO UPDATE SET
+            first_name = :first_name,
+            last_name = :last_name'
     );
+
     $statement->execute([
-      ':first_name' => $user->name()->first(),
-      ':last_name' => $user->name()->last(),
       ':uuid' => (string)$user->uuid(),
       ':username' => $user->username(),
+      ':first_name' => $user->name()->first(),
+      ':last_name' => $user->name()->last(),
     ]);
   }
 
@@ -71,7 +74,7 @@ class SqliteUsersRepository implements UsersRepositoryInterface
    */
   private function getUser(PDOStatement $statement, string $errorString): User
   {
-    $result = $statement->fetch(\PDO::FETCH_ASSOC);
+    $result = $statement->fetch(PDO::FETCH_ASSOC);
     if ($result === false) {
       throw new UserNotFoundException(
         "Cannot find user: $errorString"
