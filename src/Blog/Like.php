@@ -2,28 +2,29 @@
 
 namespace Viktoriya\PHP2\Blog;
 
+use Viktoriya\PHP2\Blog\Post;
+use Viktoriya\PHP2\Blog\User;
+use Viktoriya\PHP2\Blog\UUID;
 
-class Comment
+class Like
 {
   private UUID $uuid;
-  private User $user;
   private Post $post;
-  private string $commentText;
+  private User $user;
+
 
   public function __construct(
     UUID $uuid,
-    User $user,
     Post $post,
-    string $commentText
+    User $user
   ) {
     $this->uuid = $uuid;
-    $this->user = $user;
     $this->post = $post;
-    $this->commentText = $commentText;
+    $this->user = $user;
   }
 
   /**
-   * @return UUID
+   * @return int
    */
   public function getUuid(): UUID
   {
@@ -31,7 +32,7 @@ class Comment
   }
 
   /**
-   * @param UUID $uuid
+   * @param int $id
    */
   public function setUuid(UUID $uuid): void
   {
@@ -68,26 +69,5 @@ class Comment
   public function setPost(Post $post): void
   {
     $this->post = $post;
-  }
-
-  /**
-   * @return string
-   */
-  public function getCommentText(): string
-  {
-    return $this->commentText;
-  }
-
-  /**
-   * @param string $commentText
-   */
-  public function setCommentText(string $commentText): void
-  {
-    $this->commentText = $commentText;
-  }
-
-  public function __toString()
-  {
-    return $this->user . ' опубликовал комментарий: "' . $this->commentText . '"' . PHP_EOL;
   }
 }

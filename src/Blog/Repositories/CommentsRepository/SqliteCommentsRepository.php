@@ -10,7 +10,8 @@ use Viktoriya\PHP2\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Viktoriya\PHP2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Viktoriya\PHP2\Blog\UUID;
 use Viktoriya\PHP2\Blog\Post;
-use PDO;
+use \PDO;
+use \PDOStatement;
 
 class SqliteCommentsRepository implements CommentsRepositoryInterface
 {
@@ -33,7 +34,7 @@ class SqliteCommentsRepository implements CommentsRepositoryInterface
       ':uuid' => $comment->getUuid(),
       ':post_uuid' => $comment->getPost()->getUuid(),
       ':author_uuid' => $comment->getUser()->uuid(),
-      ':text' => $comment->getText(),
+      ':text' => $comment->getCommentText(),
     ]);
   }
 
@@ -53,9 +54,9 @@ class SqliteCommentsRepository implements CommentsRepositoryInterface
    * @throws CommentNotFoundException
    * @throws InvalidArgumentException
    */
-  private function getComment(\PDOStatement $statement, string $commentUuid): Comment
+  private function getComment(PDOStatement $statement, string $commentUuid): Comment
   {
-    $result = $statement->fetch(\PDO::FETCH_ASSOC);
+    $result = $statement->fetch(PDO::FETCH_ASSOC);
     if ($result === false) {
       throw new CommentNotFoundException(
         "Cannot find comment: $commentUuid"

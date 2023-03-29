@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Viktoriya\PHP2\Blog;
@@ -44,7 +43,7 @@ class User
     return $this->username;
   }
 
-  public function setLogin(string $username): void
+  public function setUsername(string $username): void
   {
     $this->username = $username;
   }
