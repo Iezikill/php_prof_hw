@@ -8,5 +8,5 @@ use Viktoriya\PHP2\Blog\Like;
 interface LikeRepositoryInterface
 {
   public function save(Like $like): void;
-  public function getByPostUuid(UUID $uuid): Like;
+  public function getByPostUuid(UUID $uuid): array;
 }

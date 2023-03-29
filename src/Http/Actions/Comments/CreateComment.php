@@ -17,13 +17,15 @@ use Viktoriya\PHP2\http\ErrorResponse;
 use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\Response;
 use Viktoriya\PHP2\http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 class CreateComment implements ActionInterface
 {
   public function __construct(
     private UsersRepositoryInterface $usersRepository,
     private PostsRepositoryInterface $postsRepository,
-    private CommentsRepositoryInterface $commentsRepository
+    private CommentsRepositoryInterface $commentsRepository,
+    private LoggerInterface $logger
   ) {
   }
 
@@ -67,6 +69,7 @@ class CreateComment implements ActionInterface
     }
 
     $this->commentsRepository->save($comment);
+    $this->logger->info("Comment created: $newCommentUuid");
 
     return new SuccessfulResponse([
       'uuid' => (string)$newCommentUuid,

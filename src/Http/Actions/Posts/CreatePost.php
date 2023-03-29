@@ -14,6 +14,7 @@ use Viktoriya\PHP2\http\ErrorResponse;
 use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\Response;
 use Viktoriya\PHP2\http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 
 class CreatePost implements ActionInterface
@@ -21,7 +22,8 @@ class CreatePost implements ActionInterface
 
   public function __construct(
     private UsersRepositoryInterface $usersRepository,
-    private PostsRepositoryInterface $postsRepository
+    private PostsRepositoryInterface $postsRepository,
+    private LoggerInterface $logger
   ) {
   }
 
@@ -53,6 +55,7 @@ class CreatePost implements ActionInterface
     }
 
     $this->postsRepository->save($post);
+    $this->logger->info("Post created: $newPostUuid");
 
     return new SuccessfulResponse([
       'uuid' => (string)$newPostUuid,
