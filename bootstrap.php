@@ -1,18 +1,24 @@
 <?php
 
 use Viktoriya\PHP2\Blog\Container\DIContainer;
+use Viktoriya\PHP2\Blog\Repositories\AuthTokensRepository\AuthTokensRepositoryInterface;
+use Viktoriya\PHP2\Blog\Repositories\AuthTokensRepository\SqliteAuthTokensRepository;
 use Viktoriya\PHP2\Blog\Repositories\LikeRepository\LikeRepositoryInterface;
 use Viktoriya\PHP2\Blog\Repositories\LikeRepository\SqliteLikeRepository;
-use Viktoriya\PHP2\Blog\Repositories\PostsRepository\PostsRepositoryInterface;
+use Viktoriya\PHP2\Blog\Repositories\PostsRepository\PostRepositoryInterface;
 use Viktoriya\PHP2\Blog\Repositories\PostsRepository\SqlitePostsRepository;
 use Viktoriya\PHP2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Viktoriya\PHP2\Blog\Repositories\UsersRepository\UsersRepositoryInterface;
 use Viktoriya\PHP2\Blog\Repositories\CommentsRepository\SqliteCommentsRepository;
 use Viktoriya\PHP2\Blog\Repositories\CommentsRepository\CommentsRepositoryInterface;
-
+use Viktoriya\PHP2\Http\Auth\AuthenticationInterface;
+use Viktoriya\PHP2\Http\Auth\BearerTokenAuthentication;
 use Viktoriya\PHP2\Http\Auth\IdentificationInterface;
 use Viktoriya\PHP2\Http\Auth\JsonBodyUsernameIdentification;
 use Viktoriya\PHP2\Http\Auth\JsonBodyUuidIdentification;
+use Viktoriya\PHP2\Http\Auth\PasswordAuthentication;
+use Viktoriya\PHP2\Http\Auth\PasswordAuthenticationInterface;
+use Viktoriya\PHP2\Http\Auth\TokenAuthenticationInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -50,6 +56,26 @@ if ('yes' === $_ENV['LOG_TO_CONSOLE']) {
 }
 
 $container->bind(
+  TokenAuthenticationInterface::class,
+  BearerTokenAuthentication::class
+);
+
+$container->bind(
+  PasswordAuthenticationInterface::class,
+  PasswordAuthentication::class
+);
+
+$container->bind(
+  AuthTokensRepositoryInterface::class,
+  SqliteAuthTokensRepository::class
+);
+
+$container->bind(
+  AuthenticationInterface::class,
+  PasswordAuthentication::class
+);
+
+$container->bind(
   IdentificationInterface::class,
   JsonBodyUsernameIdentification::class
 );
@@ -60,8 +86,8 @@ $container->bind(
 );
 
 $container->bind(
-  PostRepositoryInterface::class,
-  SqlitePostRepository::class
+  PostsRepositoryInterface::class,
+  SqlitePostsRepository::class
 );
 
 $container->bind(
@@ -70,8 +96,8 @@ $container->bind(
 );
 
 $container->bind(
-  CommentRepositoryInterface::class,
-  SqliteCommentRepository::class
+  CommentsRepositoryInterface::class,
+  SqliteCommentsRepository::class
 );
 
 $container->bind(

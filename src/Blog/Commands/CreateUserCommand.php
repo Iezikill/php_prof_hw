@@ -12,7 +12,7 @@ use Viktoriya\PHP2\Blog\UUID;
 use Viktoriya\PHP2\Person\Name;
 use Psr\Log\LoggerInterface;
 
-final class CreateUserCommand
+class CreateUserCommand
 {
   public function __construct(
     private UsersRepositoryInterface $usersRepository,
@@ -29,16 +29,16 @@ final class CreateUserCommand
       throw new CommandException("User already exists: $username");
     }
 
-    $uuid = UUID::random();
-    $this->usersRepository->save(new User(
-      $uuid,
+    $user = User::createFrom(
+      $username,
+      $arguments->get('password'),
       new Name(
         $arguments->get('first_name'),
         $arguments->get('last_name')
-      ),
-      $username,
-    ));
-    $this->logger->info("User created: $uuid");
+      )
+    );
+    $this->usersRepository->save($user);
+    $this->logger->info("User created: " . $user->uuid());
   }
 
   private function userExists(string $username): bool

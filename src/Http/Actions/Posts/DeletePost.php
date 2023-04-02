@@ -3,9 +3,11 @@
 namespace Viktoriya\PHP2\Http\Actions\Posts;
 
 use Viktoriya\PHP2\Blog\Exceptions\PostNotFoundException;
+use Viktoriya\PHP2\Blog\Exceptions\AuthException;
 use Viktoriya\PHP2\Blog\Repositories\PostsRepository\PostsRepositoryInterface;
 use Viktoriya\PHP2\Blog\UUID;
 use Viktoriya\PHP2\Http\Actions\ActionInterface;
+use Viktoriya\PHP2\Http\Auth\TokenAuthenticationInterface;
 use Viktoriya\PHP2\Http\ErrorResponse;
 use Viktoriya\PHP2\Http\SuccessfulResponse;
 use Viktoriya\PHP2\http\Request;
@@ -16,7 +18,8 @@ class DeletePost implements ActionInterface
 {
   public function __construct(
     private PostsRepositoryInterface $postsRepository,
-    private LoggerInterface $logger
+    private LoggerInterface $logger,
+    private TokenAuthenticationInterface $authentication
   ) {
   }
 
@@ -33,9 +36,15 @@ class DeletePost implements ActionInterface
       return new ErrorResponse($error->getMessage());
     }
 
+    try {
+      $user = $this->authentication->user($request);
+    } catch (AuthException $e) {
+      $logger->warning($e->getMessage());
+      return new ErrorResponse($e->getMessage());
+    }
+
     $this->postsRepository->delete(new UUID($postUuid));
     $logger->info("Post deleted: $postUuid");
-
     return new SuccessfulResponse([
       'uuid' => $postUuid,
     ]);
