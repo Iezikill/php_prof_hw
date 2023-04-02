@@ -20,7 +20,9 @@
     "php": "^8.2.3",
     "fakerphp/faker": "*",
     "ext-pdo": "*",
-    "symfony/polyfill-uuid": "^1.27"
+    "symfony/polyfill-uuid": "^1.27",
+    "monolog/monolog": "^3.3",
+    "vlucas/phpdotenv": "^5.5"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

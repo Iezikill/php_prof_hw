@@ -13,9 +13,11 @@ use Viktoriya\PHP2\Http\Actions\Likes\CreateLike;
 use Viktoriya\PHP2\Http\Actions\Likes\ShowLikes;
 
 use Viktoriya\PHP2\Blog\Exceptions\HttpException;
+use Psr\Log\LoggerInterface;
 
 // require_once __DIR__ . '/vendor/autoload.php';
 $container = require __DIR__ . '/bootstrap.php';
+$logger = $container->get(LoggerInterface::class);
 
 $request = new Request(
   $_GET,
@@ -42,35 +44,36 @@ $routes = [
 
 try {
   $path = $request->path();
-} catch (HttpException) {
+} catch (HttpException $e) {
   (new ErrorResponse)->send();
+  $logger->warning($e->getMessage());
   return;
 }
 
 try {
   $method = $request->method();
-} catch (HttpException) {
+} catch (HttpException $e) {
+  $logger->warning($e->getMessage());
   (new ErrorResponse)->send();
   return;
 }
 
-if (!array_key_exists($method, $routes)) {
-  (new ErrorResponse("Route not found: $method $path"))->send();
-  return;
-}
-
-if (!array_key_exists($path, $routes[$method])) {
-  (new ErrorResponse("Route not found: $method $path"))->send();
+if (!array_key_exists($method, $routes) || !array_key_exists($path, $routes[$method])) {
+  $message = "Route not found: $method $path";
+  $logger->notice($message);
+  (new ErrorResponse($message))->send();
   return;
 }
 
 $actionClassName = $routes[$method][$path];
+
 $action = $container->get($actionClassName);
 
 try {
   $response = $action->handle($request);
   $response->send();
 } catch (AppException $e) {
+  $logger->error($e->getMessage(), ['exception' => $e]);
   (new ErrorResponse($e->getMessage()))->send();
 }
 $response->send();

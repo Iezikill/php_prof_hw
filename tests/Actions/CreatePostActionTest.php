@@ -2,7 +2,8 @@
 
 namespace Actions;
 
-
+use Viktoriya\Blog\UnitTests\DummyLogger;
+use Viktoriya\PHP2\Http\Auth\IdentificationInterface;
 use Viktoriya\PHP2\Http\ErrorResponse;
 use Viktoriya\PHP2\Blog\Exceptions\JsonException;
 use Viktoriya\PHP2\Http\Actions\Posts\CreatePost;
@@ -92,18 +93,24 @@ class CreatePostActionTest extends TestCase
   public function testItReturnsSuccessfulResponse(): void
   {
     $request = new Request([], [], '{"author_uuid":"10373537-0805-4d7a-830e-22b481b4859c","title":"title","text":"text"}');
+
     $postsRepository = $this->postsRepository();
+
     $usersRepository = $this->usersRepository([
       new User(
         new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
         new Name('name', 'surname'),
         'username',
+
       ),
     ]);
 
-    $action = new CreatePost($usersRepository, $postsRepository);
+    $action = new CreatePost($usersRepository, $postsRepository, new DummyLogger());
+
     $response = $action->handle($request);
+
     $this->assertInstanceOf(SuccessfulResponse::class, $response);
+
     $this->setOutputCallback(function ($data) {
       $dataDecode = json_decode(
         $data,
@@ -119,6 +126,8 @@ class CreatePostActionTest extends TestCase
     });
 
     $this->expectOutputString('{"success":true,"data":{"uuid":"351739ab-fc33-49ae-a62d-b606b7038c87"}}');
+
+
     $response->send();
   }
 
@@ -133,7 +142,7 @@ class CreatePostActionTest extends TestCase
     $postsRepository = $this->postsRepository();
     $usersRepository = $this->usersRepository([]);
 
-    $action = new CreatePost($usersRepository, $postsRepository);
+    $action = new CreatePost($usersRepository, $postsRepository, new DummyLogger());
 
     $response = $action->handle($request);
 
@@ -161,7 +170,7 @@ class CreatePostActionTest extends TestCase
       ),
     ]);
 
-    $action = new CreatePost($usersRepository, $postsRepository);
+    $action = new CreatePost($usersRepository, $postsRepository, new DummyLogger());
 
     $response = $action->handle($request);
 

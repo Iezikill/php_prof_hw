@@ -11,6 +11,7 @@ use Viktoriya\PHP2\http\ErrorResponse;
 use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\SuccessfulResponse;
 use Viktoriya\PHP2\Person\Name;
+use Viktoriya\Blog\UnitTests\DummyLogger;
 use PHPUnit\Framework\TestCase;
 
 class FindByUsernameActionTest extends TestCase
@@ -24,7 +25,8 @@ class FindByUsernameActionTest extends TestCase
   {
     $request = new Request([], [], "");
     $usersRepository = $this->usersRepository([]);
-    $action = new FindByUsername($usersRepository);
+
+    $action = new FindByUsername($usersRepository, new DummyLogger());
     $response = $action->handle($request);
     $this->assertInstanceOf(ErrorResponse::class, $response);
     $this->expectOutputString('{"success":false,"reason":"No such query param in the request: username"}');
@@ -38,7 +40,7 @@ class FindByUsernameActionTest extends TestCase
   {
     $request = new Request(['username' => 'ivan'], [], '');
     $usersRepository = $this->usersRepository([]);
-    $action = new FindByUsername($usersRepository);
+    $action = new FindByUsername($usersRepository, new DummyLogger());
     $response = $action->handle($request);
     $this->assertInstanceOf(ErrorResponse::class, $response);
     $this->expectOutputString('{"success":false,"reason":"Not found"}');
@@ -59,7 +61,8 @@ class FindByUsernameActionTest extends TestCase
         'ivan',
       ),
     ]);
-    $action = new FindByUsername($usersRepository);
+
+    $action = new FindByUsername($usersRepository, new DummyLogger());
     $response = $action->handle($request);
     $this->assertInstanceOf(SuccessfulResponse::class, $response);
     $this->expectOutputString('{"success":true,"data":{"username":"ivan","name":"Ivan Nikitin"}}');

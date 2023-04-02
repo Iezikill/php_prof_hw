@@ -16,13 +16,15 @@ use Viktoriya\PHP2\http\ErrorResponse;
 use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\Response;
 use Viktoriya\PHP2\http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 class CreateLike implements ActionInterface
 {
   public function __construct(
     private UsersRepositoryInterface $usersRepository,
     private PostsRepositoryInterface $postsRepository,
-    private LikeRepositoryInterface $likeRepository
+    private LikeRepositoryInterface $likeRepository,
+    private LoggerInterface $logger
   ) {
   }
 
@@ -65,6 +67,7 @@ class CreateLike implements ActionInterface
     }
 
     $this->likeRepository->save($like);
+    $this->logger->info("Like created: $newLikeUuid");
 
     return new SuccessfulResponse([
       'uuid' => (string)$newLikeUuid,

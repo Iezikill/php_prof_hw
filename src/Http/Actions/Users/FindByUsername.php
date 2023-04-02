@@ -10,25 +10,32 @@ use Viktoriya\PHP2\http\ErrorResponse;
 use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\Response;
 use Viktoriya\PHP2\http\SuccessfulResponse;
+use Psr\Log\LoggerInterface;
 
 class FindByUsername implements ActionInterface
 {
   public function __construct(
-    private UsersRepositoryInterface $usersRepository
+    private UsersRepositoryInterface $usersRepository,
+    private LoggerInterface $logger
   ) {
   }
 
   public function handle(Request $request): Response
   {
+    $container = require 'bootstrap.php';
+    $logger = $container->get(LoggerInterface::class);
+
     try {
       $username = $request->query('username');
     } catch (HttpException $e) {
+      $logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 
     try {
       $user = $this->usersRepository->getByUsername($username);
     } catch (UserNotFoundException $e) {
+      $logger->warning($e->getMessage());
       return new ErrorResponse($e->getMessage());
     }
 

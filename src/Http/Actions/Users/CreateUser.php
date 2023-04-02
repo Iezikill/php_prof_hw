@@ -12,11 +12,13 @@ use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\Response;
 use Viktoriya\PHP2\http\SuccessfulResponse;
 use Viktoriya\PHP2\Person\Name;
+use Psr\Log\LoggerInterface;
 
 class CreateUser implements ActionInterface
 {
   public function __construct(
     private UsersRepositoryInterface $usersRepository,
+    private LoggerInterface $logger
   ) {
   }
 
@@ -38,6 +40,7 @@ class CreateUser implements ActionInterface
     }
 
     $this->usersRepository->save($user);
+    $this->logger->info("User created: $newUserUuid");
 
     return new SuccessfulResponse([
       'uuid' => (string)$newUserUuid,

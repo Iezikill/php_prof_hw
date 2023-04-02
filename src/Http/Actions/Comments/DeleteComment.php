@@ -10,16 +10,21 @@ use Viktoriya\PHP2\Http\ErrorResponse;
 use Viktoriya\PHP2\Http\SuccessfulResponse;
 use Viktoriya\PHP2\http\Request;
 use Viktoriya\PHP2\http\Response;
+use Psr\Log\LoggerInterface;
 
 class DeleteComment implements ActionInterface
 {
   public function __construct(
-    private CommentsRepositoryInterface $commentsRepository
+    private CommentsRepositoryInterface $commentsRepository,
+    private LoggerInterface $logger
   ) {
   }
 
   public function handle(Request $request): Response
   {
+    $container = require 'bootstrap.php';
+    $logger = $container->get(LoggerInterface::class);
+
     try {
       $commentUuid = $request->query('uuid');
       $this->commentsRepository->get(new UUID($commentUuid));
@@ -28,6 +33,7 @@ class DeleteComment implements ActionInterface
     }
 
     $this->commentsRepository->delete(new UUID($commentUuid));
+    $logger->info("Comment deleted: $commentUuid");
 
     return new SuccessfulResponse([
       'uuid' => $commentUuid,

@@ -3,11 +3,13 @@
 namespace Viktoriya\PHP2\Blog\Repositories\LikeRepository;
 
 use Viktoriya\PHP2\Blog\Exceptions\LikeNotFoundException;
+use Viktoriya\PHP2\Blog\Exceptions\LikeAlreadyExist;
 use Viktoriya\PHP2\Blog\Like;
 
 use Viktoriya\PHP2\Blog\Post;
 use Viktoriya\PHP2\Blog\Repositories\UsersRepository\SqliteUsersRepository;
 use Viktoriya\PHP2\Blog\Repositories\PostsRepository\SqlitePostsRepository;
+use Viktoriya\PHP2\Blog\User;
 use Viktoriya\PHP2\Blog\UUID;
 use \PDO;
 use \PDOStatement;
@@ -20,7 +22,6 @@ class SqliteLikeRepository implements LikeRepositoryInterface
   {
     $this->connection = $connection;
   }
-
 
   public function save(Like $like): void
   {
@@ -37,37 +38,34 @@ class SqliteLikeRepository implements LikeRepositoryInterface
   }
 
 
-  public function getByPostUuid(UUID $postUuid): Like
+  public function getByPostUuid(UUID $postUuid): array
   {
     $statement = $this->connection->prepare(
       'SELECT * FROM likes WHERE post_uuid = :post_uuid'
     );
 
     $statement->execute([':post_uuid' => (string)$postUuid]);
+    $result = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-    return $this->getLike($statement, $postUuid);
-  }
-
-
-  private function getLike(PDOStatement $statement, string $postUuid): Like
-  {
-    $result = $statement->fetch(PDO::FETCH_ASSOC);
-    if ($result === false) {
+    if (!$result) {
       throw new LikeNotFoundException(
-        "Cannot find like from post: $postUuid"
+        'No likes to post with uuid = : ' . $postUuid
       );
     }
 
     $userRepository = new SqliteUsersRepository($this->connection);
-    $user = $userRepository->get(new UUID($result['author_uuid']));
-
     $postRepository = new SqlitePostsRepository($this->connection);
-    $post = $postRepository->get(new UUID($result['post_uuid']));
-
-    return new Like(
-      new UUID($result['uuid']),
-      $post,
-      $user,
-    );
+    $likes = [];
+    foreach ($result as $like) {
+      print_r($like);
+      $user = $userRepository->get(new UUID($like['author_uuid']));
+      $post = $postRepository->get(new UUID($like['post_uuid']));
+      $likes[] = new Like(
+        uuid: new UUID($like['uuid']),
+        post: $post,
+        user: $user,
+      );
+    }
+    return $likes;
   }
 }
