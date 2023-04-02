@@ -34,17 +34,18 @@ class SqliteUsersRepositoryTest extends TestCase
       ->method('execute')
       ->with([
         ':uuid' => '123e4567-e89b-12d3-a456-426614174000',
-        ':username' => 'ivan1',
+        ':username' => 'ivan123',
         ':first_name' => 'Ivan',
-        ':last_name' => 'Ivanov',
+        ':last_name' => 'Nikitin',
       ]);
     $connectionStub->method('prepare')->willReturn($statementMock);
     $repository = new SqliteUsersRepository($connectionStub);
     $repository->save(
       new User(
         new UUID('123e4567-e89b-12d3-a456-426614174000'),
-        new Name('Ivan', 'Ivanov'),
-        'ivan1',
+        new Name('Ivan', 'Nikitin'),
+        'ivan123',
+        '123'
       )
     );
   }
