@@ -11,11 +11,11 @@ use Viktoriya\PHP2\Http\ErrorResponse;
 use Viktoriya\PHP2\Http\Request;
 use Viktoriya\PHP2\Http\Actions\Likes\CreateLike;
 use Viktoriya\PHP2\Http\Actions\Likes\ShowLikes;
-
 use Viktoriya\PHP2\Blog\Exceptions\HttpException;
+use Viktoriya\PHP2\Http\Actions\Auth\LogIn;
+use Viktoriya\PHP2\Http\Actions\Auth\LogOut;
 use Psr\Log\LoggerInterface;
 
-// require_once __DIR__ . '/vendor/autoload.php';
 $container = require __DIR__ . '/bootstrap.php';
 $logger = $container->get(LoggerInterface::class);
 
@@ -31,6 +31,8 @@ $routes = [
     '/likes/show' => ShowLikes::class,
   ],
   'POST' => [
+    '/login' => LogIn::class,
+    '/logout' => LogOut::class,
     '/users/create' => CreateUser::class,
     '/posts/create' => CreatePost::class,
     '/comments/create' => CreateComment::class,
@@ -66,7 +68,6 @@ if (!array_key_exists($method, $routes) || !array_key_exists($path, $routes[$met
 }
 
 $actionClassName = $routes[$method][$path];
-
 $action = $container->get($actionClassName);
 
 try {
@@ -75,5 +76,5 @@ try {
 } catch (AppException $e) {
   $logger->error($e->getMessage(), ['exception' => $e]);
   (new ErrorResponse($e->getMessage()))->send();
+  return;
 }
-$response->send();
