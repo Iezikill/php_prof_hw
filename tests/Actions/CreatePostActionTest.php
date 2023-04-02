@@ -18,6 +18,8 @@ use Viktoriya\PHP2\Blog\Repositories\PostsRepository\PostsRepositoryInterface;
 use Viktoriya\PHP2\Blog\UUID;
 use Viktoriya\PHP2\Blog\Exceptions\PostNotFoundException;
 use PHPUnit\Framework\TestCase;
+use Viktoriya\PHP2\Blog\Exceptions\AuthException;
+use Viktoriya\PHP2\Http\Auth\TokenAuthenticationInterface;
 
 class CreatePostActionTest extends TestCase
 {
@@ -101,16 +103,25 @@ class CreatePostActionTest extends TestCase
         new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
         new Name('name', 'surname'),
         'username',
-
+        '123'
       ),
     ]);
 
-    $action = new CreatePost($usersRepository, $postsRepository, new DummyLogger());
+    $authenticationStub = $this->createStub(TokenAuthenticationInterface::class);
+    $authenticationStub
+      ->method('user')
+      ->willReturn(
+        new User(
+          new UUID("10373537-0805-4d7a-830e-22b481b4859c"),
+          new Name('first', 'last'),
+          'username',
+          '123'
+        )
+      );
 
+    $action = new CreatePost($postsRepository, new DummyLogger(), $authenticationStub);
     $response = $action->handle($request);
-
     $this->assertInstanceOf(SuccessfulResponse::class, $response);
-
     $this->setOutputCallback(function ($data) {
       $dataDecode = json_decode(
         $data,
@@ -126,8 +137,6 @@ class CreatePostActionTest extends TestCase
     });
 
     $this->expectOutputString('{"success":true,"data":{"uuid":"351739ab-fc33-49ae-a62d-b606b7038c87"}}');
-
-
     $response->send();
   }
 
@@ -138,17 +147,19 @@ class CreatePostActionTest extends TestCase
   public function testItReturnsErrorResponseIfNotFoundUser(): void
   {
     $request = new Request([], [], '{"author_uuid":"10373537-0805-4d7a-830e-22b481b4859c","title":"title","text":"text"}');
+    $postsRepositoryStub = $this->createStub(PostRepositoryInterface::class);
+    $authenticationStub = $this->createStub(TokenAuthenticationInterface::class);
 
-    $postsRepository = $this->postsRepository();
-    $usersRepository = $this->usersRepository([]);
+    $authenticationStub
+      ->method('user')
+      ->willThrowException(
+        new AuthException('Cannot find user: 10373537-0805-4d7a-830e-22b481b4859c')
+      );
 
-    $action = new CreatePost($usersRepository, $postsRepository, new DummyLogger());
-
+    $action = new CreatePost($postsRepositoryStub, new DummyLogger(), $authenticationStub);
     $response = $action->handle($request);
-
     $this->assertInstanceOf(ErrorResponse::class, $response);
     $this->expectOutputString('{"success":false,"reason":"Cannot find user: 10373537-0805-4d7a-830e-22b481b4859c"}');
-
     $response->send();
   }
 
@@ -167,16 +178,25 @@ class CreatePostActionTest extends TestCase
         new UUID('10373537-0805-4d7a-830e-22b481b4859c'),
         new Name('Ivan', 'Nikitin'),
         'ivan',
+        '123',
       ),
     ]);
 
-    $action = new CreatePost($usersRepository, $postsRepository, new DummyLogger());
-
+    $authenticationStub = $this->createStub(TokenAuthenticationInterface::class);
+    $authenticationStub
+      ->method('user')
+      ->willReturn(
+        new User(
+          new UUID("10373537-0805-4d7a-830e-22b481b4859c"),
+          new Name('first', 'last'),
+          'username',
+          '123'
+        )
+      );
+    $action = new CreatePost($postsRepository, new DummyLogger(), $authenticationStub);
     $response = $action->handle($request);
-
     $this->assertInstanceOf(ErrorResponse::class, $response);
     $this->expectOutputString('{"success":false,"reason":"No such field: text"}');
-
     $response->send();
   }
 }
